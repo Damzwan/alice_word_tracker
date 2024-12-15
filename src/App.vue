@@ -7,7 +7,7 @@ import a2 from "./assets/a2.gif"
 const tableData = reactive({
   rows: [],
   columns: [],
-  values: { },
+  values: {},
 });
 
 const hoveredCell = ref<{ row: string; col: string } | null>(null);
@@ -53,6 +53,11 @@ function addEntry() {
   newValue.value = "";
 }
 
+const filteredColumns = (rowIndex: number) => {
+  return tableData.columns.filter((_, colIndex) => colIndex <= rowIndex);
+};
+
+
 // Delete a row or column
 function deleteEntry() {
   const value = newValue.value.trim();
@@ -94,12 +99,7 @@ loadTableData();
 
       <!-- Add or delete entry input -->
       <div class="input-container">
-        <input
-          v-model="newValue"
-          @keyup.enter="addEntry"
-          type="text"
-          placeholder="Add or delete row/column"
-        />
+        <input v-model="newValue" @keyup.enter="addEntry" type="text" placeholder="Add or delete row/column" />
         <button @click="addEntry">Add Entry</button>
         <button class="delete-button" @click="deleteEntry">Delete Entry</button>
       </div>
@@ -110,47 +110,35 @@ loadTableData();
           <thead>
             <tr>
               <th></th>
-              <th
-                v-for="col in tableData.columns"
-                :key="col"
-                :class="{ highlight: hoveredCell?.col === col }"
-                style="color: white;"
-              >
+              <th v-for="(col, colIndex) in tableData.columns" :key="col" :class="{ highlight: hoveredCell?.col === col }"
+                style="color: white;">
                 {{ col }}
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in tableData.rows" :key="row">
+            <tr v-for="(row, rowIndex) in tableData.rows" :key="row">
               <td :class="{ highlight: hoveredCell?.row === row }" style="color: white;">{{ row }}</td>
-              <td
-                v-for="col in tableData.columns"
-                :key="col"
-                :class="{ diagonal: row === col }"
-                @click="changeValue(row, col, 1)"
-                @mouseover="hoveredCell = { row, col }"
-                @mouseout="hoveredCell = null"
-              >
+              <td v-for="(col, colIndex) in filteredColumns(rowIndex)" :key="col" @click="changeValue(row, col, 1)"
+                :class="{ diagonal: row === col }" @mouseover="hoveredCell = { row, col }" @mouseout="hoveredCell = null">
                 <div class="cell-container">
                   <span>
                     {{ tableData.values[row][col] }}
                   </span>
-                  <button
-                    class="decrement-button"
-                    @click.stop="changeValue(row, col, -1)"
-                    :disabled="row === col"
-                  >
+                  <button class="decrement-button" @click.stop="changeValue(row, col, -1)">
                     -
                   </button>
                 </div>
               </td>
             </tr>
+
           </tbody>
         </table>
 
+
         <div class="img-container">
           <img :src="a1" alt="" width="500">
-        <img :src="a2" alt="" height="300">
+          <img :src="a2" alt="" height="300">
         </div>
       </div>
     </section>
@@ -158,8 +146,7 @@ loadTableData();
 </template>
 
 <style scoped>
-
-main{
+main {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -260,9 +247,9 @@ td {
   color: #ccc;
 }
 
-.img-container{
+.img-container {
   display: flex;
   padding-top: 20px;
-  
+
 }
 </style>
